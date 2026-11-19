@@ -639,7 +639,7 @@ func NewMCPServer(provider *provider.ApiProvider, logger *zap.Logger, enabledToo
 	}
 }
 
-func (s *MCPServer) ServeSSE(addr string) *server.SSEServer {
+func (s *MCPServer) ServeSSE(addr string) *http.Server {
 	s.logger.Info("Creating SSE server",
 		zap.String("context", "console"),
 		zap.String("version", version.Version),
@@ -647,7 +647,7 @@ func (s *MCPServer) ServeSSE(addr string) *server.SSEServer {
 		zap.String("commit_hash", version.CommitHash),
 		zap.String("address", addr),
 	)
-	return server.NewSSEServer(s.server,
+	transport := server.NewSSEServer(s.server,
 		server.WithBaseURL(fmt.Sprintf("http://%s", addr)),
 		server.WithSSEContextFunc(func(ctx context.Context, r *http.Request) context.Context {
 			ctx = auth.AuthFromRequest(s.logger)(ctx, r)
@@ -655,9 +655,14 @@ func (s *MCPServer) ServeSSE(addr string) *server.SSEServer {
 			return ctx
 		}),
 	)
+	return &http.Server{
+		Addr:              addr,
+		Handler:           auth.RequireBearerToken(transport),
+		ReadHeaderTimeout: 10 * time.Second,
+	}
 }
 
-func (s *MCPServer) ServeHTTP(addr string) *server.StreamableHTTPServer {
+func (s *MCPServer) ServeHTTP(addr string) *http.Server {
 	s.logger.Info("Creating HTTP server",
 		zap.String("context", "console"),
 		zap.String("version", version.Version),
@@ -665,7 +670,7 @@ func (s *MCPServer) ServeHTTP(addr string) *server.StreamableHTTPServer {
 		zap.String("commit_hash", version.CommitHash),
 		zap.String("address", addr),
 	)
-	return server.NewStreamableHTTPServer(s.server,
+	transport := server.NewStreamableHTTPServer(s.server,
 		server.WithEndpointPath("/mcp"),
 		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
 			ctx = auth.AuthFromRequest(s.logger)(ctx, r)
@@ -673,6 +678,11 @@ func (s *MCPServer) ServeHTTP(addr string) *server.StreamableHTTPServer {
 			return ctx
 		}),
 	)
+	return &http.Server{
+		Addr:              addr,
+		Handler:           auth.RequireBearerToken(transport),
+		ReadHeaderTimeout: 10 * time.Second,
+	}
 }
 
 func (s *MCPServer) ServeStdio() error {

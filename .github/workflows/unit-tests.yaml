@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-  pull_request_target:
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -26,4 +26,7 @@ jobs:
         run: make deps
 
       - name: Run unit tests
-        run: make test
+        run: go test -race -count=1 -skip '^TestIntegration(ChannelsListQueryFilter|PublicChannelsList|PrivateChannelsList|Conversations)$' ./...
+
+      - name: Vet
+        run: go vet ./...

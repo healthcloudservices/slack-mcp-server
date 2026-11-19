@@ -112,7 +112,7 @@ func main() {
 			port = strconv.Itoa(defaultSsePort)
 		}
 
-		sseServer := s.ServeSSE(":" + port)
+		sseServer := s.ServeSSE(host + ":" + port)
 		logger.Info(
 			fmt.Sprintf("SSE server listening on %s", fmt.Sprintf("%s:%s/sse", host, port)),
 			zap.String("context", "console"),
@@ -126,7 +126,7 @@ func main() {
 			)
 		}
 
-		if err := sseServer.Start(host + ":" + port); err != nil {
+		if err := sseServer.ListenAndServe(); err != nil {
 			logger.Fatal("Server error",
 				zap.String("context", "console"),
 				zap.Error(err),
@@ -142,7 +142,7 @@ func main() {
 			port = strconv.Itoa(defaultSsePort)
 		}
 
-		httpServer := s.ServeHTTP(":" + port)
+		httpServer := s.ServeHTTP(host + ":" + port)
 		logger.Info(
 			fmt.Sprintf("HTTP server listening on %s", fmt.Sprintf("%s:%s", host, port)),
 			zap.String("context", "console"),
@@ -156,7 +156,7 @@ func main() {
 			)
 		}
 
-		if err := httpServer.Start(host + ":" + port); err != nil {
+		if err := httpServer.ListenAndServe(); err != nil {
 			logger.Fatal("Server error",
 				zap.String("context", "console"),
 				zap.Error(err),

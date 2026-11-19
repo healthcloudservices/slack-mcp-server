@@ -27,7 +27,7 @@ Inject these variables from your credential manager or a private launcher:
 
 Clients connect to `http://127.0.0.1:13080/mcp` and send `Authorization: Bearer <MCP key>`. Give clients the MCP key, never the Slack token. Both HTTP and SSE reject every unauthenticated request; a missing configured key returns 503. Stdio does not require the network key. The legacy `SLACK_MCP_SSE_API_KEY` remains supported.
 
-The token needs the existing directory/history scopes plus `search:read` for search and `chat:write` for sending. Adding scopes requires reinstalling the Slack app and replacing the local token. A successful token check alone does not prove these scopes. The local trial reuses Pi's credential loader and private secret file, without committing or duplicating the token. Restart the service after replacing a static token.
+The token needs the existing directory/history scopes plus `search:read` for search and `chat:write` for sending. After adding scopes, reinstall the Slack app and verify the installed token's scopes. Slack may update the existing token's permissions; replace the local token only if Slack issues a different one. A successful token check alone does not prove these scopes. The local trial reuses Pi's credential loader and private secret file, without committing or duplicating the token. Restart the service after replacing a static token.
 
 Use your own Slack DM for a clearly labeled test message. Verify its returned timestamp, read the resulting thread from another MCP client, and search for its unique marker. This is request/response read and write access; it does not subscribe to Slack Events or deliver unsolicited Slack messages to agents. Remote hosting and an event listener are separate work.
 

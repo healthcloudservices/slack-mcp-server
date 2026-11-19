@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GO_VERSION: 1.25
+  GO_VERSION: 1.27.4
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 permissions:

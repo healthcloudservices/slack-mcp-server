@@ -23,7 +23,7 @@ func withAuthKey(ctx context.Context, auth string) context.Context {
 
 // Authenticate checks if the request is authenticated based on the provided context.
 func validateToken(ctx context.Context, logger *zap.Logger) (bool, error) {
-	// no configured token means no authentication
+	// Network transports must have a configured token.
 	keyA := os.Getenv("SLACK_MCP_API_KEY")
 	if keyA == "" {
 		keyA = os.Getenv("SLACK_MCP_SSE_API_KEY")
@@ -33,10 +33,7 @@ func validateToken(ctx context.Context, logger *zap.Logger) (bool, error) {
 	}
 
 	if keyA == "" {
-		logger.Debug("No SSE API key configured, skipping authentication",
-			zap.String("context", "http"),
-		)
-		return true, nil
+		return false, fmt.Errorf("MCP API key is not configured")
 	}
 
 	keyB, ok := ctx.Value(authKey{}).(string)
@@ -52,9 +49,11 @@ func validateToken(ctx context.Context, logger *zap.Logger) (bool, error) {
 		zap.Bool("has_bearer_prefix", strings.HasPrefix(keyB, "Bearer ")),
 	)
 
-	if strings.HasPrefix(keyB, "Bearer ") {
-		keyB = strings.TrimPrefix(keyB, "Bearer ")
+	scheme, token, valid := strings.Cut(keyB, " ")
+	if !valid || !strings.EqualFold(scheme, "Bearer") {
+		return false, fmt.Errorf("missing bearer token")
 	}
+	keyB = token
 
 	if subtle.ConstantTimeCompare([]byte(keyA), []byte(keyB)) != 1 {
 		logger.Warn("Invalid auth token provided",

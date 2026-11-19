@@ -1,10 +1,22 @@
 package text
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/slack-go/slack"
 )
+
+func TestBlocksToTextPreservesQuotesAndCode(t *testing.T) {
+	var blocks slack.Blocks
+	err := json.Unmarshal([]byte(`[{"type":"rich_text","elements":[{"type":"rich_text_quote","border":1,"elements":[{"type":"text","text":"quoted text"}]},{"type":"rich_text_preformatted","border":1,"language":"go","elements":[{"type":"text","text":"fmt.Println(42)"}]}]}]`), &blocks)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := BlocksToText(blocks); got != "quoted text fmt.Println(42)" {
+		t.Fatalf("got %q", got)
+	}
+}
 
 func TestBlocksToText(t *testing.T) {
 	tests := []struct {
@@ -371,8 +383,8 @@ func TestAttachmentToText(t *testing.T) {
 		{
 			name: "fields_with_all_parts",
 			att: slack.Attachment{
-				Title:  "Alert",
-				Text:   "Failed workflow",
+				Title: "Alert",
+				Text:  "Failed workflow",
 				Fields: []slack.AttachmentField{
 					{Title: "Env", Value: "prod"},
 					{Title: "Version", Value: "v1.9.0"},
@@ -918,4 +930,3 @@ func TestFilesToTextProcessTextPipeline(t *testing.T) {
 		})
 	}
 }
-

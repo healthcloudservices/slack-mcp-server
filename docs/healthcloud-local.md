@@ -37,6 +37,8 @@ Dependabot covers Go modules, GitHub Actions, and Docker base images weekly. Rep
 
 The initial Go scan found 43 advisories, with call paths for 12. Updating the vulnerable modules and Go toolchain removes all fixable findings reported by that scan. `GO-2026-6911` remains in `github.com/mark3labs/mcp-go`: its HTTP client may forward credentials across redirects, and the advisory has no published fixed version. The scan reports no reachable path in this server. This is an outstanding dependency risk, not a clean module scan. Track the upstream fix at <https://github.com/mark3labs/mcp-go/issues/1164>.
 
+GitHub also reports three advisories against `go-jose/v3`, which Playwright imports through the legacy `json` package. This fork explicitly resolves that module to the maintained `go-jose/v4` implementation at v4.1.9. The three advisories are patched in v4.1.5/v4.1.6; v3 has no published patch. No go-jose cryptography package is imported by this repository's packages. Remove this compatibility replacement when slackdump migrates its browser dependency to the newer Playwright module path. The local trial verifies User OAuth authentication; interactive browser authentication is not qualified by that trial.
+
 ```sh
 go test -race -count=1 -skip '^TestIntegration(ChannelsListQueryFilter|PublicChannelsList|PrivateChannelsList|Conversations)$' ./...
 go vet ./...

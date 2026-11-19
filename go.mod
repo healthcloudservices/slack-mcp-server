@@ -98,3 +98,6 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+// Playwright imports only the legacy JSON codec; use its maintained, patched v4 implementation.
+replace github.com/go-jose/go-jose/v3 => github.com/go-jose/go-jose/v4 v4.1.9
